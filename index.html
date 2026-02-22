@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Neo Striker | Elite Manager</title>
+    
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            /* DARK BLUE THEME VARIABLES */
+            --bg-deep: #020617;       /* Deepest Blue */
+            --bg-surface: #0f172a;    /* Slate 900 */
+            --bg-card: #1e293b;       /* Slate 800 */
+            --bg-input: #334155;      /* Slate 700 */
+            
+            --primary: #38bdf8;       /* Electric Blue */
+            --primary-glow: rgba(56, 189, 248, 0.3);
+            --secondary: #6366f1;     /* Indigo */
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --gold: #fbbf24;
+            --silver: #cbd5e1;
+            --bronze: #b45309;
+        }
+
+        * { box-sizing: border-box; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body { 
+            background-color: var(--bg-deep); 
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 40%);
+            color: var(--text-main); 
+            margin: 0; padding: 0;
+            min-height: 100vh;
+        }
+
+        /* --- UTILITY CLASSES --- */
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- LOGIN / AUTH SCREEN --- */
+        #auth-screen {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; padding: 25px;
+            background: linear-gradient(180deg, var(--bg-deep) 0%, #0f172a 100%);
+        }
+        
+        .auth-card {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 40px 30px; border-radius: 24px;
+            width: 100%; max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        .brand-title {
+            font-size: 32px; font-weight: 800; text-align: center; margin: 0;
+            background: linear-gradient(135deg, #fff 0%, var(--primary) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+        .brand-subtitle { text-align: center; color: var(--text-muted); font-size: 14px; margin-bottom: 30px; margin-top: 5px; }
+
+        .discord-btn {
+            width: 100%; background: #5865F2; /* Discord Color */
+            color: white; border: none; padding: 14px; border-radius: 12px;
+            font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 10px 20px -5px rgba(88, 101, 242, 0.4);
+            transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .discord-btn:active { transform: scale(0.97); }
+        .discord-btn:hover { background: #4752C4; }
+
+        /* --- DASHBOARD UI & OTHERS (Tetap sama) --- */
+        #dashboard-screen { padding-bottom: 100px; }
+        .header-profile { background: linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, rgba(2, 6, 23, 0) 100%); padding: 20px 20px 30px 20px; border-radius: 0 0 30px 30px; text-align: center; position: relative; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .app-logo-small { font-weight: 800; color: var(--primary); letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; font-size: 16px; }
+        .header-actions { display: flex; gap: 8px; }
+        .btn-logout { background: rgba(255,255,255,0.1); border:none; color: white; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;}
+        .btn-admin { background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--gold); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .avatar-wrap { position: relative; display: inline-block; margin-bottom: 12px; }
+        .avatar-img { width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 3px solid var(--bg-card); box-shadow: 0 0 25px var(--primary-glow); }
+        .btn-edit-profile { position: absolute; bottom: 0; right: 0; background: var(--primary); color: var(--bg-deep); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid var(--bg-deep); cursor: pointer; }
+        .user-info h2 { font-size: 24px; font-weight: 700; margin: 0; color: white; }
+        .user-meta { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 5px; font-size: 13px; color: var(--text-muted); }
+        .pos-badge { background: rgba(99, 102, 241, 0.2); color: #818cf8; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 11px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 20px; margin-top: 15px; }
+        .stats-grid-row2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 0 20px; margin-top: 10px; }
+        .stat-box { background: var(--bg-card); padding: 15px 5px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .stat-val { font-size: 18px; font-weight: 700; display: block; color: white; }
+        .stat-lbl { font-size: 10px; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; display: block; letter-spacing: 0.5px; }
+
+        .section-container { padding: 25px 20px; }
+        .section-title { font-size: 14px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; }
+        .card-item { background: var(--bg-card); border-radius: 16px; padding: 15px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between; }
+        
+        .highlight-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .highlight-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 20px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .highlight-card.gold { border: 1px solid rgba(251, 191, 36, 0.3); }
+        .highlight-card.purple { border: 1px solid rgba(99, 102, 241, 0.3); }
+        .hl-icon { font-size: 18px; margin-bottom: 8px; display: inline-block; }
+        .gold .hl-icon { color: var(--gold); }
+        .purple .hl-icon { color: var(--secondary); }
+        .hl-title { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 5px; font-weight: 700; }
+        .hl-name { font-size: 13px; font-weight: 700; color: white; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hl-val { font-size: 16px; font-weight: 800; color: white; }
+
+        .lb-tabs { display: flex; background: var(--bg-card); padding: 5px; border-radius: 14px; margin-bottom: 15px; gap: 5px; overflow-x: auto; }
+        .lb-tab-btn { flex: 1; min-width: 70px; background: none; border: none; color: var(--text-muted); padding: 10px 5px; font-size: 11px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: 0.3s; white-space: nowrap; }
+        .lb-tab-btn.active { background: var(--bg-input); color: white; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+
+        .custom-table { width: 100%; border-collapse: collapse; font-size: 13px; color: white; text-align: center; }
+        .custom-table thead th { border-bottom: 1px solid #334155; color: #94a3b8; font-size: 11px; text-transform: uppercase; padding: 10px; }
+        .custom-table tbody td { padding: 12px 5px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+        .tbl-left { text-align: left; padding-left: 10px !important; }
+        .tbl-val { font-weight: bold; color: var(--primary); }
+        
+        .lb-rank { font-weight: 800; font-size: 14px; width: 24px; text-align: center; margin-right: 8px; display: inline-block; color: var(--text-muted); }
+        .rank-1 { color: var(--gold); text-shadow: 0 0 10px rgba(251, 191, 36, 0.4); }
+        .rank-2 { color: var(--silver); }
+        .rank-3 { color: var(--bronze); }
+        .lb-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--bg-input); margin-right: 10px; background: var(--bg-deep); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background: var(--bg-surface); width: 85%; max-width: 340px; padding: 25px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); transform: translateY(20px); transition: 0.3s; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { margin: 0; font-size: 18px; }
+        .modal-close { cursor: pointer; color: var(--text-muted); }
+        .label { font-size: 12px; color: var(--text-muted); margin: 15px 0 6px 0; display: block; }
+        .form-input { width: 100%; background: var(--bg-deep); border: 1px solid var(--bg-input); padding: 14px; border-radius: 12px; color: white; font-size: 14px; transition: 0.3s; }
+        .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .btn-main { width: 100%; background: linear-gradient(90deg, var(--secondary), var(--primary)); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 10px; box-shadow: 0 10px 20px -5px rgba(56, 189, 248, 0.4); transition: 0.2s; }
+        .btn-main:active { transform: scale(0.97); }
+        .warning-msg { color: var(--danger); font-size: 11px; margin-top: 6px; display: none; background: rgba(239, 68, 68, 0.1); padding: 8px; border-radius: 8px; }
+
+        .nav-bar { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 450px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 12px 0; display: flex; justify-content: space-around; box-shadow: 0 10px 40px rgba(0,0,0,0.5); z-index: 100; }
+        .nav-btn { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 9px; font-weight: 500; cursor: pointer; width: 60px; }
+        .nav-btn i { font-size: 18px; transition: 0.3s; }
+        .nav-btn.active { color: var(--primary); }
+        .nav-btn.active i { transform: translateY(-3px); filter: drop-shadow(0 0 8px var(--primary)); }
+    </style>
+</head>
+<body>
+
+    <!-- 1. AUTHENTICATION SCREEN -->
+    <div id="auth-screen">
+        <div class="auth-card fade-in" id="auth-card-content">
+            <h1 class="brand-title">NEO STRIKER</h1>
+            <p class="brand-subtitle">Player Management System</p>
+
+            <!-- Discord Login -->
+            <div id="form-discord">
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 25px; line-height: 1.5;">
+                    Connect your Discord account to sync with our official server and register automatically.
+                </p>
+                <button class="discord-btn" onclick="loginWithDiscord()">
+                    <i class="fa-brands fa-discord"></i> LOGIN WITH DISCORD
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. DASHBOARD SCREEN -->
+    <div id="dashboard-screen" class="hidden">
+        
+        <!-- View: HOME (PROFILE) -->
+        <div id="view-home" class="view-section fade-in">
+            <div class="header-profile">
+                <div class="top-nav">
+                    <div class="app-logo-small">
+                        <img src="logo.png" class="app-logo-img" alt="Logo" onerror="this.style.display='none'">
+                        NEO STRIKER
+                    </div>
+                    
+                    <div class="header-actions">
+                        <button id="btnAdminPanel" class="btn-admin hidden" onclick="window.location.href='admin.html'">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </button>
+                        <button class="btn-logout" onclick="doLogout()">
+                            <i class="fa-solid fa-power-off"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="avatar-wrap">
+                    <img src="" id="displayAvatar" class="avatar-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/847/847969.png'">
+                    <div class="btn-edit-profile" onclick="openEditModal()"><i class="fa-solid fa-pen"></i></div>
+                </div>
+
+                <div class="user-info">
+                    <h2 id="displayName">Loading...</h2>
+                    <div class="user-meta">
+                        <span class="pos-badge" id="displayPos">POS</span>
+                        <span id="displayTeam">Free Agent</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Stats (3 Col) -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-val" id="valGoals">0</span>
+                    <span class="stat-lbl">Goals</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="valAssists">0</span>
+                    <span class="stat-lbl">Assists</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="valValue" style="color:var(--success)">€0M</span>
+                    <span class="stat-lbl">Market Val</span>
+                </div>
+            </div>
+
+            <!-- Extra Stats (2 Col) -->
+            <div class="stats-grid-row2">
+                <div class="stat-box">
+                    <span class="stat-val" id="valSaves">0</span>
+                    <span class="stat-lbl">Saves</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val" id="valMotm" style="color:var(--warning)">0</span>
+                    <span class="stat-lbl">MVP / MOTM</span>
+                </div>
+            </div>
+
+            <div class="section-container">
+                <div class="section-title"><i class="fa-solid fa-bolt"></i> Player Status</div>
+                <div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px; border:1px dashed var(--bg-input); border-radius:12px;">
+                    Ready for next match.
+                </div>
+            </div>
+        </div>
+
+        <!-- View: TEAMS -->
+        <div id="view-teams" class="view-section hidden section-container fade-in">
+            <div class="section-title"><i class="fa-solid fa-shield-halved"></i> Registered Clubs</div>
+            <div id="teamsListContainer"></div>
+        </div>
+
+        <!-- View: LEADERBOARD -->
+        <div id="view-leaderboard" class="view-section hidden section-container fade-in">
+            <div class="highlight-container">
+                <div class="highlight-card gold">
+                    <div class="hl-icon"><i class="fa-solid fa-crown"></i></div>
+                    <div class="hl-title">Most MVP</div>
+                    <div class="hl-name" id="mvpName">Loading...</div>
+                    <div class="hl-val" id="mvpVal">-</div>
+                </div>
+                <div class="highlight-card purple">
+                    <div class="hl-icon"><i class="fa-solid fa-medal"></i></div>
+                    <div class="hl-title">Most MOTM</div>
+                    <div class="hl-name" id="motmName">Loading...</div>
+                    <div class="hl-val" id="motmVal">-</div>
+                </div>
+            </div>
+
+            <div class="section-title"><i class="fa-solid fa-ranking-star"></i> Rankings</div>
+
+            <div class="lb-tabs">
+                <button class="lb-tab-btn active" onclick="changeLbTab('goals', this)">Top Scorers</button>
+                <button class="lb-tab-btn" onclick="changeLbTab('assists', this)">Top Assists</button>
+                <button class="lb-tab-btn" onclick="changeLbTab('saves', this)">Most Saves</button>
+                <button class="lb-tab-btn" onclick="changeLbTab('value', this)">Most Valuable</button>
+            </div>
+
+            <div style="background:var(--bg-card); border-radius:16px; padding:15px; overflow-x:auto;">
+                <table class="custom-table">
+                    <thead>
+                        <tr id="lbHeaderRow">
+                            <th class="tbl-left" style="padding-left:15px;">Player</th>
+                            <th>Club</th>
+                            <th id="lbMainStat">G</th>
+                            <th id="lbSubStat">A</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <tr><td colspan="4">Loading data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- View: SQUAD -->
+        <div id="view-squad" class="view-section hidden section-container fade-in">
+            <div class="section-title"><i class="fa-solid fa-users"></i> Team Squad</div>
+            <div id="squadList"></div>
+        </div>
+
+        <!-- View: LEAGUE -->
+        <div id="view-league" class="view-section hidden section-container fade-in">
+            <div class="section-title"><i class="fa-solid fa-trophy"></i> League Standings</div>
+            <div style="background:var(--bg-card); border-radius:16px; padding:15px; overflow-x:auto;">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th class="tbl-left">Club</th>
+                            <th>P</th>
+                            <th>W</th>
+                            <th>D</th>
+                            <th>L</th>
+                            <th>GD</th>
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leagueTableBody">
+                        <tr><td colspan="7">Loading Table...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT PROFILE MODAL -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Profile</h3>
+                <i class="fa-solid fa-xmark modal-close" onclick="closeEditModal()"></i>
+            </div>
+
+            <label class="label">Avatar Image URL</label>
+            <input type="text" id="editAvatar" class="form-input" placeholder="https://...">
+
+            <label class="label">Username</label>
+            <input type="text" id="editName" class="form-input">
+            <div id="nameWarning" class="warning-msg"></div>
+
+            <label class="label">Position</label>
+            <select id="editPos" class="form-input">
+                <option value="TBD">TBD (To Be Decided)</option>
+                <option value="FW">Forward</option>
+                <option value="MF">Midfielder</option>
+                <option value="DF">Defender</option>
+                <option value="GK">Goalkeeper</option>
+            </select>
+
+            <button class="btn-main" onclick="saveProfile()" style="margin-top:20px;">SAVE CHANGES</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <nav class="nav-bar hidden" id="bottomNav">
+        <button class="nav-btn active" onclick="switchView('view-home', this)">
+            <i class="fa-solid fa-house"></i> Home
+        </button>
+        <button class="nav-btn" onclick="switchView('view-teams', this); loadTeams();">
+            <i class="fa-solid fa-shield-halved"></i> Teams
+        </button>
+        <button class="nav-btn" onclick="switchView('view-leaderboard', this); loadLeaderboard();">
+            <i class="fa-solid fa-ranking-star"></i> Rank
+        </button>
+        <button class="nav-btn" onclick="switchView('view-squad', this)">
+            <i class="fa-solid fa-shirt"></i> Squad
+        </button>
+        <button class="nav-btn" onclick="switchView('view-league', this); loadLeague();">
+            <i class="fa-solid fa-trophy"></i> League
+        </button>
+    </nav>
+
+    <!-- JAVASCRIPT (FIREBASE & DISCORD LOGIC) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ==========================================
+        // 1. CONFIGURATION (UBAH BAGIAN INI!)
+        // ==========================================
+        
+        // A. FIREBASE CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRHui-PlaCSOPremobbw1iqVGRzm1z-qA",
+            authDomain: "neo-strker-association.firebaseapp.com",
+            projectId: "neo-strker-association",
+            storageBucket: "neo-strker-association.firebasestorage.app",
+            messagingSenderId: "1091520662423",
+            appId: "1:1091520662423:web:57f0a0d5d4cb10d06692d2"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // B. DISCORD CONFIG
+        const DISCORD_CLIENT_ID = "1472190260678230127"; 
+        const REQUIRED_GUILD_ID = "1466862489110315184"; 
+        const REDIRECT_URI = window.location.href.split('https://rep6se.github.io/NSA/index.html')[0]; // URL otomatis website kamu saat ini
+
+        let currentUserData = null;
+        let cachedUsers = []; 
+
+        // ==========================================
+        // 2. DISCORD AUTH FLOW
+        // ==========================================
+
+        window.onload = async () => {
+            // Cek apakah ada Token di URL setelah redirect dari Discord
+            const fragment = new URLSearchParams(window.location.hash.slice(1));
+            const accessToken = fragment.get('access_token');
+            const tokenType = fragment.get('token_type');
+
+            if (accessToken) {
+                // Bersihkan URL dari Token demi keamanan visual
+                window.history.replaceState(null, null, window.location.pathname);
+                await processDiscordLogin(accessToken, tokenType);
+            } else {
+                // Cek Session Lokal (Sudah pernah login)
+                const savedDiscordId = localStorage.getItem('neo_user_id');
+                if (savedDiscordId) {
+                    showDashboard();
+                    await loadUserData(savedDiscordId);
+                } else {
+                    showAuthScreen();
+                }
+            }
+        };
+
+        // Tombol Login via Discord
+        window.loginWithDiscord = () => {
+            if(DISCORD_CLIENT_ID === "MASUKKAN_CLIENT_ID_DISCORD_DISINI") {
+                alert("Kamu belum memasukkan DISCORD_CLIENT_ID di kodingan!");
+                return;
+            }
+            const scope = 'identify guilds';
+            const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(scope)}`;
+            window.location.href = authUrl;
+        };
+
+        // Proses Data dari Discord & Daftar/Login ke Firebase
+        async function processDiscordLogin(token, type) {
+            try {
+                document.getElementById('auth-card-content').innerHTML = "<h2 style='color:white'>Verifying with Discord...</h2><p style='color:var(--text-muted)'>Checking Server Membership...</p>";
+                
+                // Ambil Data Profil
+                const resUser = await fetch('https://discord.com/api/users/@me', { headers: { authorization: `${type} ${token}` } });
+                const discordUser = await resUser.json();
+
+                // Ambil List Server yang diikuti user
+                const resGuilds = await fetch('https://discord.com/api/users/@me/guilds', { headers: { authorization: `${type} ${token}` } });
+                const guilds = await resGuilds.json();
+
+                // Cek apakah user ada di Server kita
+                const isMember = guilds.some(g => g.id === REQUIRED_GUILD_ID);
+                if (!isMember) {
+                    alert("Akses Ditolak! Kamu harus bergabung dengan Discord Server Official kami terlebih dahulu.");
+                    localStorage.removeItem('neo_user_id');
+                    window.location.reload();
+                    return;
+                }
+
+                // Cek atau Daftarkan ke Firestore
+                const userRef = doc(db, "users", discordUser.id);
+                const userSnap = await getDoc(userRef);
+
+                let defaultAvatar = discordUser.avatar 
+                    ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png` 
+                    : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
+                if (!userSnap.exists()) {
+                    // AUTO REGISTER!
+                    await setDoc(userRef, {
+                        username: discordUser.global_name || discordUser.username,
+                        position: "TBD", // To Be Decided (belum ditentukan)
+                        team: null,
+                        role: "player",
+                        goals: 0,
+                        assists: 0,
+                        saves: 0,
+                        motm: 0,
+                        mvp: 0,
+                        avatar: defaultAvatar,
+                        lastUsernameChange: 0 
+                    });
+                }
+
+                // Berhasil Login, simpan Session id ke localStorage
+                localStorage.setItem('neo_user_id', discordUser.id);
+                showDashboard();
+                await loadUserData(discordUser.id);
+
+            } catch (err) {
+                console.error("Auth Error:", err);
+                alert("Gagal memproses login Discord.");
+                window.location.reload();
+            }
+        }
+
+        window.doLogout = () => {
+            localStorage.removeItem('neo_user_id');
+            window.location.reload();
+        };
+
+        function showAuthScreen() {
+            document.getElementById('auth-screen').classList.remove('hidden');
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('bottomNav').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            document.getElementById('bottomNav').classList.remove('hidden');
+        }
+
+        // ==========================================
+        // 3. DASHBOARD & FIRESTORE LOGIC
+        // ==========================================
+
+        function calculateValue(p) {
+            const g = p.goals || 0, a = p.assists || 0, s = p.saves || 0, m = p.motm || 0, mvp = p.mvp || 0;
+            return (g*1.5) + (a*1.0) + (s*0.5) + (m*0.5) + (mvp*1.0);
+        }
+
+        async function loadUserData(userId) {
+            try {
+                const snap = await getDoc(doc(db, "users", userId));
+                if (snap.exists()) {
+                    currentUserData = { id: userId, ...snap.data() };
+                    
+                    if (currentUserData.role === 'admin' || currentUserData.role === 'manager') {
+                        document.getElementById('btnAdminPanel').classList.remove('hidden');
+                    } else {
+                        document.getElementById('btnAdminPanel').classList.add('hidden');
+                    }
+
+                    renderUI();
+                    loadSquad(currentUserData.team);
+                } else {
+                    doLogout(); // User was deleted
+                }
+            } catch (e) {
+                console.error("Error loading data:", e);
+            }
+        }
+
+        function renderUI() {
+            if(!currentUserData) return;
+            
+            document.getElementById('displayName').innerText = currentUserData.username;
+            document.getElementById('displayPos').innerText = currentUserData.position;
+            document.getElementById('displayTeam').innerText = currentUserData.team || "Free Agent";
+            
+            const ava = currentUserData.avatar || "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+            document.getElementById('displayAvatar').src = ava;
+
+            const g = currentUserData.goals || 0, a = currentUserData.assists || 0;
+            const s = currentUserData.saves || 0, m = (currentUserData.motm || 0) + (currentUserData.mvp || 0);
+
+            document.getElementById('valGoals').innerText = g;
+            document.getElementById('valAssists').innerText = a;
+            document.getElementById('valSaves').innerText = s;
+            document.getElementById('valMotm').innerText = m;
+            
+            const val = calculateValue(currentUserData);
+            document.getElementById('valValue').innerText = "€" + val.toFixed(1) + "M";
+        }
+
+        async function loadSquad(teamName) {
+            const container = document.getElementById('squadList');
+            if(!teamName) {
+                container.innerHTML = `<div class="card-item" style="justify-content:center; color:gray;">You have no team.</div>`;
+                return;
+            }
+
+            const q = query(collection(db, "users"), where("team", "==", teamName));
+            const snap = await getDocs(q);
+            container.innerHTML = "";
+            snap.forEach(d => {
+                const p = d.data();
+                container.innerHTML += `
+                    <div class="card-item">
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <div style="background:#334155; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px;">${p.position}</div>
+                            <span>${p.username}</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted)">${p.goals}G / ${p.assists}A</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Leaderboard & Filter Code (sama seperti sebelumnya)
+        let currentLbType = 'goals';
+        window.loadLeaderboard = async () => {
+            try {
+                const q = query(collection(db, "users"));
+                const snap = await getDocs(q);
+                cachedUsers = [];
+                snap.forEach(d => cachedUsers.push(d.data()));
+                renderHighlights();
+                renderLbTable(currentLbType);
+            } catch(e) {}
+        };
+
+        function renderHighlights() {
+            if(cachedUsers.length === 0) return;
+            const maxMvp = cachedUsers.reduce((prev, curr) => ((prev.mvp || 0) > (curr.mvp || 0)) ? prev : curr);
+            document.getElementById('mvpName').innerText = maxMvp.username;
+            document.getElementById('mvpVal').innerText = (maxMvp.mvp || 0) + " Wins";
+            const maxMotm = cachedUsers.reduce((prev, curr) => ((prev.motm || 0) > (curr.motm || 0)) ? prev : curr);
+            document.getElementById('motmName').innerText = maxMotm.username;
+            document.getElementById('motmVal').innerText = (maxMotm.motm || 0) + " Wins";
+        }
+
+        window.changeLbTab = (type, btn) => {
+            currentLbType = type;
+            document.querySelectorAll('.lb-tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderLbTable(type);
+        }
+
+        function renderLbTable(type) {
+            const tbody = document.getElementById('leaderboardBody');
+            const mainH = document.getElementById('lbMainStat'), subH = document.getElementById('lbSubStat');
+            if(type === 'goals') { mainH.innerText = 'G'; subH.innerText = 'A'; }
+            else if(type === 'assists') { mainH.innerText = 'A'; subH.innerText = 'G'; }
+            else if(type === 'saves') { mainH.innerText = 'S'; subH.innerText = 'G'; }
+            else if(type === 'value') { mainH.innerText = 'Val'; subH.innerText = 'G'; }
+
+            let sortedData = [...cachedUsers]; 
+            if(type === 'value') sortedData.sort((a, b) => calculateValue(b) - calculateValue(a));
+            else sortedData.sort((a, b) => (b[type] || 0) - (a[type] || 0));
+
+            let html = "", rank = 1;
+            sortedData.slice(0, 10).forEach(p => {
+                let rankClass = "lb-rank" + (rank===1?" rank-1":rank===2?" rank-2":rank===3?" rank-3":"");
+                let mainVal = 0, subVal = 0;
+
+                if(type === 'goals') { mainVal = p.goals; subVal = p.assists; }
+                else if(type === 'assists') { mainVal = p.assists; subVal = p.goals; }
+                else if(type === 'saves') { mainVal = p.saves; subVal = p.goals; }
+                else if(type === 'value') { mainVal = "€" + calculateValue(p).toFixed(1) + "M"; subVal = p.goals; }
+
+                html += `
+                    <tr>
+                        <td class="tbl-left" style="display:flex; align-items:center;">
+                            <span class="${rankClass}">${rank}</span>
+                            <img src="${p.avatar || 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}" class="lb-avatar">
+                            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:90px; font-weight:600;">${p.username}</span>
+                        </td>
+                        <td style="color:var(--text-muted); font-size:11px;">${p.team ? p.team.substring(0,3).toUpperCase() : 'FA'}</td>
+                        <td class="tbl-val" style="font-size:13px;">${mainVal}</td>
+                        <td style="color:var(--text-muted);">${subVal}</td>
+                    </tr>`;
+                rank++;
+            });
+            tbody.innerHTML = html || '<tr><td colspan="4">No players found.</td></tr>';
+        }
+
+        window.loadTeams = async () => {
+            const container = document.getElementById('teamsListContainer');
+            try {
+                const snap = await getDocs(query(collection(db, "teams"), orderBy("name")));
+                if(snap.empty) { container.innerHTML = '<div style="text-align:center; padding:20px; color:gray;">No teams registered.</div>'; return; }
+                let html = "";
+                snap.forEach(doc => {
+                    const c = doc.data();
+                    const logoHtml = c.logo ? `<img src="${c.logo}" style="width:100%; height:100%; object-fit:cover;">` : c.name.substring(0,1);
+                    html += `
+                        <div class="card-item">
+                            <div style="display:flex; gap:12px; align-items:center;">
+                                <div style="width:40px;height:40px;background:#334155;border-radius:50%;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:bold;color:white;">${logoHtml}</div>
+                                <div><div style="font-weight:bold; font-size:15px;">${c.name}</div><div style="font-size:11px; color:var(--text-muted);">Matches: ${c.played || 0}</div></div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:16px; font-weight:bold; color:var(--primary);">${c.points || 0}</div>
+                                <div style="font-size:9px; text-transform:uppercase; color:var(--text-muted);">Points</div>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            } catch (e) { console.error(e); }
+        };
+
+        window.loadLeague = async () => {
+            const tbody = document.getElementById('leagueTableBody');
+            try {
+                const snap = await getDocs(collection(db, "teams"));
+                let clubs = [];
+                snap.forEach(d => clubs.push(d.data()));
+                clubs.sort((a, b) => b.points !== a.points ? b.points - a.points : (b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf));
+                
+                let html = clubs.length === 0 ? '<tr><td colspan="7">No teams in league yet.</td></tr>' : "";
+                clubs.forEach(c => {
+                    const w = c.won || 0, l = c.lost || 0, d = c.draw || 0, gd = c.gd || 0;
+                    html += `
+                        <tr>
+                            <td class="tbl-left" style="font-weight:600;"><div style="display:flex; align-items:center; gap:6px;">
+                                <img src="${c.logo || ''}" style="width:16px; height:16px; border-radius:50%; background:#333;" onerror="this.style.display='none'">${c.name}
+                            </div></td>
+                            <td>${c.played || 0}</td><td>${w}</td><td>${d}</td><td>${l}</td><td>${gd > 0 ? '+'+gd : gd}</td><td class="tbl-val">${c.points || 0}</td>
+                        </tr>`;
+                });
+                tbody.innerHTML = html;
+            } catch (e) { console.error(e); }
+        };
+
+        // PROFILE EDIT LOGIC
+        window.openEditModal = () => {
+            if(!currentUserData) return;
+            document.getElementById('editAvatar').value = currentUserData.avatar || "";
+            document.getElementById('editName').value = currentUserData.username;
+            document.getElementById('editPos').value = currentUserData.position || "TBD";
+            document.getElementById('nameWarning').style.display = 'none';
+            document.getElementById('editModal').classList.add('active');
+        };
+
+        window.closeEditModal = () => document.getElementById('editModal').classList.remove('active');
+
+        window.saveProfile = async () => {
+            const newUrl = document.getElementById('editAvatar').value;
+            const newName = document.getElementById('editName').value;
+            const newPos = document.getElementById('editPos').value;
+            const now = Date.now(), threeWeeks = 21 * 24 * 60 * 60 * 1000, lastChange = currentUserData.lastUsernameChange || 0;
+
+            let updates = {};
+            if(newName !== currentUserData.username) {
+                if(now - lastChange < threeWeeks) {
+                    const diff = threeWeeks - (now - lastChange);
+                    const daysLeft = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                    const warnBox = document.getElementById('nameWarning');
+                    warnBox.style.display = 'block';
+                    warnBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Cannot change name yet. Wait ${daysLeft} days.`;
+                    return; 
+                } else {
+                    updates.username = newName;
+                    updates.lastUsernameChange = now;
+                }
+            }
+            updates.position = newPos;
+            if(newUrl) updates.avatar = newUrl;
+
+            try {
+                await updateDoc(doc(db, "users", currentUserData.id), updates);
+                currentUserData = { ...currentUserData, ...updates };
+                renderUI();
+                closeEditModal();
+                alert("Profile Updated Successfully!");
+            } catch (e) {
+                alert("Error saving: " + e.message);
+            }
+        };
+
+        window.switchView = (viewId, btn) => {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(viewId).classList.remove('hidden');
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+        }
+
+    </script>
+</body>
+</html>
