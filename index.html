@@ -398,11 +398,13 @@
         const db = getFirestore(app);
 
         // B. DISCORD CONFIG
-        const DISCORD_CLIENT_ID = "1472190260678230127"; 
-        const REQUIRED_GUILD_ID = "1466862489110315184"; 
-        const REDIRECT_URI = window.location.href.split('https://rep6se.github.io/NSA/index.html')[0]; // URL otomatis website kamu saat ini
+const DISCORD_CLIENT_ID = "1472190260678230127"; 
+const REQUIRED_GUILD_ID = "1466862489110315184"; 
 
-        let currentUserData = null;
+// HAPUS KODE LAMA DAN GANTI DENGAN INI:
+const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+let currentUserData = null;
         let cachedUsers = []; 
 
         // ==========================================
